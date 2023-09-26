@@ -2,13 +2,15 @@ name: "get-fellows-action"
 description: "Fetch all the GitHub handles from the Fellows"
 author: Bullrich
 branding:
-  icon: copy
-  color: yellow
+  icon: users
+  color: red
 outputs:
-  fellow-handles:
+  fellows-handles:
     description: 'A JSON array with all the GitHub handles of the fellows.'
   fellows-map:
     description: 'A JSON array with objects of type { "user": "github-handle", "rank": rank (as a number) }'
+  fellows:
+    description: 'All the fellows handles separated by commas'
 
 runs:
   using: 'docker'
