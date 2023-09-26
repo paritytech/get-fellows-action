@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 import { mock, MockProxy } from "jest-mock-extended";
 
 import { fetchAllFellows } from "../fellows";
