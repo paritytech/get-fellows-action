@@ -5,9 +5,15 @@ import { ActionLogger } from "./github/types";
 
 type FellowData = { address: string; rank: number };
 
+export type FellowObject = {
+  address: string;
+  githubHandle?: string;
+  rank: number;
+};
+
 export const fetchAllFellows = async (
   logger: ActionLogger,
-): Promise<Map<string, number>> => {
+): Promise<FellowObject[]> => {
   let api: ApiPromise;
   logger.debug("Connecting to collective parachain");
   // we connect to the collective rpc node
@@ -38,7 +44,7 @@ export const fetchAllFellows = async (
     });
 
     // We iterate over the different members and extract their data
-    const users: Map<string, number> = new Map<string, number>();
+    const users: FellowObject[] = [];
     for (const fellow of fellows) {
       logger.debug(
         `Fetching identity of '${fellow.address}', rank: ${fellow.rank}`,
@@ -46,6 +52,8 @@ export const fetchAllFellows = async (
       const fellowData = (
         await api.query.identity.identityOf(fellow.address)
       ).toHuman() as Record<string, unknown> | undefined;
+
+      let data: FellowObject = { address: fellow.address, rank: fellow.rank };
 
       // If the identity is null, we ignore it.
       if (!fellowData) {
@@ -76,9 +84,10 @@ export const fetchAllFellows = async (
         ) {
           logger.debug(`Found handles: '${value.Raw}'`);
           // We add it to the array and remove the @ if they add it to the handle
-          users.set(value.Raw.replace("@", ""), fellow.rank);
+          data = { ...data, githubHandle: value.Raw.replace("@", "") };
         }
       }
+      users.push(data);
     }
 
     logger.info(`Found users: ${JSON.stringify(Array.from(users.entries()))}`);

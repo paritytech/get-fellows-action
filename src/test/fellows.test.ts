@@ -12,6 +12,6 @@ describe("Fellows test", () => {
 
   test("Should fetch fellows", async () => {
     const members = await fetchAllFellows(logger);
-    expect(members.size).toBeGreaterThan(0);
+    expect(members.length).toBeGreaterThan(0);
   });
 });

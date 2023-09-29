@@ -6,11 +6,9 @@ branding:
   color: red
 outputs:
   fellows-handles:
-    description: 'A JSON array with all the GitHub handles of the fellows.'
-  fellows-map:
-    description: 'A JSON array with objects of type { "user": "github-handle", "rank": rank (as a number) }'
-  fellows:
-    description: 'All the fellows handles separated by commas'
+    description: 'A JSON array with objects of type { "address": "1e2345...", "rank": rank (as a number), githubHandle: "can be null" }'
+  github-handles:
+    description: "All the fellows' Github handles separated by commas"
 
 runs:
   using: 'docker'
