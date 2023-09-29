@@ -1,16 +1,14 @@
-name: "Example Action"
-description: "This values need to be changed"
+name: "get-fellows-action"
+description: "Fetch all the GitHub handles from the Fellows"
 author: Bullrich
 branding:
-  icon: copy
-  color: yellow
-inputs:
-  GITHUB_TOKEN:
-    required: true
-    description: The token to access the repo
+  icon: users
+  color: red
 outputs:
-  repo:
-    description: 'The name of the repo in owner/repo pattern'
+  fellows-handles:
+    description: 'A JSON array with objects of type { "address": "1e2345...", "rank": rank (as a number), githubHandle: "can be null" }'
+  github-handles:
+    description: "All the fellows' Github handles separated by commas"
 
 runs:
   using: 'docker'
