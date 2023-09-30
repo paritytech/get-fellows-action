@@ -52,7 +52,7 @@ jobs:
       - name: Tag version and create release
         run: gh release create $VERSION --generate-notes
         env:
-          VERSION: ${{ needs.compare-versions.outputs.version }}
+          VERSION: v${{ needs.compare-versions.outputs.version }}
           GH_TOKEN: ${{ github.token }}
       - name: Log in to the Container registry
         uses: docker/login-action@v3
