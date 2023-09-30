@@ -1,0 +1,76 @@
+name: Publish package to GitHub Packages
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  IMAGE_NAME: action
+  REGISTRY: ghcr.io
+
+jobs:
+  test-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.3.0
+      - name: Check that the image builds
+        run: docker build . --file Dockerfile
+
+  compare-versions:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.verification.outputs.VERSION }}
+      exists: ${{ steps.checkTag.outputs.exists }}
+    steps:
+      - uses: actions/checkout@v3.3.0
+      - name: Extract package.json version
+        id: package_version
+        run: echo "VERSION=$(jq '.version' -r package.json)" >> $GITHUB_OUTPUT
+        # Compare that the versions contain the same name
+      - name: Compare versions
+        id: verification
+        uses: Bullrich/compare-version-on-action@main
+        with:
+          version: ${{ steps.package_version.outputs.VERSION }}
+        # Verifies if there is a tag with that version number
+      - uses: mukunku/tag-exists-action@v1.4.0
+        if: steps.verification.outputs.VERSION
+        id: checkTag
+        with: 
+          tag: v${{ steps.package_version.outputs.VERSION }}
+
+  publish:
+    if: github.event_name == 'push' && needs.compare-versions.outputs.exists == 'false'
+    needs: [test-image, compare-versions]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v3.3.0
+      - name: Tag version and create release
+        run: gh release create $VERSION --generate-notes
+        env:
+          VERSION: ${{ needs.compare-versions.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
+          tags: ${{ needs.compare-versions.outputs.version }}
+      - uses: actions/checkout@v3
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

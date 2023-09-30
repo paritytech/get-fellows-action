@@ -45,3 +45,14 @@ They are:
 	- Example: `[{"address":"1e2345...",rank: 4, "githubHandle":"user-1"},{"address":"1e4532...",rank: 3, "githubHandle":"user-2"},{"address":"1e8335...",rank: 6}]`
 - `github-handles`: All the fellows handles separated by commas
 	- Example: `user-1,user-2,user-3`
+
+## Deployment
+
+To deploy a new version you need to update two files:
+- [`package.json`](./package.json): Update the version number.
+- [`action.yml`](./action.yml): Update the image number in `runs.image`.
+**Important**: Both versions must have the same number.
+
+When a commit is pushed to the main branch and the versions have changed, the system will automatically tag the commit and release a new package with such version.
+
+You can find all the available versions in the [release section](./releases).
