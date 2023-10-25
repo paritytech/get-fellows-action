@@ -54,7 +54,6 @@ Adding the github account to your identity requires the usage of the `additional
 
 If you have other identity fields (`display`, `legal`, `email`, etc) already configured on-chain, you have to repeat them in this extrinsic (`None` values will override the existing information).
 
-
 ## Deployment
 
 To deploy a new version you need to update two files:
