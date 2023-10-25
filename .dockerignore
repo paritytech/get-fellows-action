@@ -6,3 +6,4 @@ Dockerfile
 .DS_Store
 
 .vscode/
+.github/
