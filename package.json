@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node dist",
     "build": "ncc build --license LICENSE",
+    "postinstall": "papi",
     "test": "jest",
     "fix": "eslint --fix 'src/**/*'",
     "lint": "eslint 'src/**/*'"
