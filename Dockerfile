@@ -1,4 +1,4 @@
-FROM node:18 as Builder
+FROM node:20 as Builder
 
 WORKDIR /action
 
@@ -10,7 +10,7 @@ COPY . .
 
 RUN yarn run build
 
-FROM node:18-slim
+FROM node:20-slim
 
 COPY --from=Builder /action/dist /action
 
