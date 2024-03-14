@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { createClient } from "@polkadot-api/client";
 import { getChain } from "@polkadot-api/node-polkadot-provider";
@@ -9,8 +10,13 @@ import collectiveDescriptor from "./codegen/collectives";
 import relayDescriptor from "./codegen/relay";
 import { ActionLogger } from "./github/types";
 
-const collectiveChain = require("@substrate/connect-known-chains/polkadot_collectives");
-const polkadot = require("@substrate/connect-known-chains/polkadot")
+const collectiveChain =
+  require("@substrate/connect-known-chains/polkadot_collectives") as {
+    chainSpec: string;
+  };
+const polkadot = require("@substrate/connect-known-chains/polkadot") as {
+  chainSpec: string;
+};
 
 type FellowData = { address: string; rank: number };
 
@@ -20,26 +26,30 @@ export type FellowObject = {
   rank: number;
 };
 
-export const fetchAllFellows = async (logger: ActionLogger): Promise<FellowObject[]> => {
+export const fetchAllFellows = async (
+  logger: ActionLogger,
+): Promise<FellowObject[]> => {
   logger.info("Initializing smoldot");
   const smoldot = start();
   const SmProvider = getSmProvider(smoldot);
   let polkadotClient: ReturnType<typeof createClient> | null = null;
 
   try {
-    const relayChain = await smoldot.addChain({ chainSpec: polkadot.chainSpec })
+    const relayChain = await smoldot.addChain({
+      chainSpec: polkadot.chainSpec,
+    });
     logger.debug("Connecting to collective parachain");
     await smoldot.addChain({
       chainSpec: collectiveChain.chainSpec,
-      potentialRelayChains: [relayChain]
-    })
+      potentialRelayChains: [relayChain],
+    });
 
     logger.info("Initializing PAPI");
     polkadotClient = createClient(
       getChain({
         provider: SmProvider({
           potentialRelayChains: [relayChain],
-          chainSpec: collectiveChain.chainSpec
+          chainSpec: collectiveChain.chainSpec,
         }),
         keyring: [],
       }),
@@ -61,25 +71,28 @@ export const fetchAllFellows = async (logger: ActionLogger): Promise<FellowObjec
     // Once we obtained this information, we disconnect this api.
     polkadotClient.destroy();
 
-
     logger.debug("Connecting to relay parachain.");
 
     // We move into the relay chain
-    polkadotClient = createClient(getChain({
-      provider: WebSocketProvider("wss://rpc.polkadot.io"),
-      keyring: []
-    }));
+    polkadotClient = createClient(
+      getChain({
+        provider: WebSocketProvider("wss://rpc.polkadot.io"),
+        keyring: [],
+      }),
+    );
     const relayApi = polkadotClient.getTypedApi(relayDescriptor);
 
     const users: FellowObject[] = [];
 
-     // We iterate over the different members and extract their data
+    // We iterate over the different members and extract their data
     for (const fellow of fellows) {
       logger.debug(
         `Fetching identity of '${fellow.address}', rank: ${fellow.rank}`,
       );
 
-      const fellowData = await relayApi.query.Identity.IdentityOf.getValue(fellow.address);
+      const fellowData = await relayApi.query.Identity.IdentityOf.getValue(
+        fellow.address,
+      );
 
       let data: FellowObject = { address: fellow.address, rank: fellow.rank };
 
@@ -91,6 +104,7 @@ export const fetchAllFellows = async (logger: ActionLogger): Promise<FellowObjec
 
       const additional = fellowData.info.additional;
 
+      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
       if (!additional || additional.length < 1) {
         logger.debug("Additional data is null. Skipping");
         continue;
@@ -115,7 +129,6 @@ export const fetchAllFellows = async (logger: ActionLogger): Promise<FellowObjec
 
     return users;
   } catch (error) {
-
     logger.error(error as Error);
     throw error;
   } finally {
