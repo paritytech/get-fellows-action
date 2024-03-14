@@ -11,8 +11,6 @@ import collectiveDescriptor from "./codegen/collectives";
 import relayDescriptor from "./codegen/relay";
 import { ActionLogger } from "./github/types";
 
-console.log("chain data", polkadot);
-
 type FellowData = { address: string; rank: number };
 
 export type FellowObject = {
