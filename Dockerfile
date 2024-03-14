@@ -4,6 +4,8 @@ WORKDIR /action
 
 COPY package.json yarn.lock ./
 
+COPY collectives.scale relay.scale polkadot-api.json ./
+
 RUN yarn install --frozen-lockfile
 
 COPY . .
