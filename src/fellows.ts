@@ -1,21 +1,17 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { createClient } from "@polkadot-api/client";
 import { getChain } from "@polkadot-api/node-polkadot-provider";
 import { getSmProvider } from "@polkadot-api/sm-provider";
+import {
+  polkadot,
+  polkadot_collectives,
+} from "@substrate/connect-known-chains";
 import { start } from "smoldot";
 
 import collectiveDescriptor from "./codegen/collectives";
 import relayDescriptor from "./codegen/relay";
 import { ActionLogger } from "./github/types";
 
-const collectiveChain =
-  require("@substrate/connect-known-chains/polkadot_collectives") as {
-    chainSpec: string;
-  };
-const polkadot = require("@substrate/connect-known-chains/polkadot") as {
-  chainSpec: string;
-};
+console.log("chain data", polkadot);
 
 type FellowData = { address: string; rank: number };
 
@@ -35,11 +31,11 @@ export const fetchAllFellows = async (
 
   try {
     const relayChain = await smoldot.addChain({
-      chainSpec: polkadot.chainSpec,
+      chainSpec: polkadot,
     });
     logger.debug("Connecting to collective parachain");
     await smoldot.addChain({
-      chainSpec: collectiveChain.chainSpec,
+      chainSpec: polkadot_collectives,
       potentialRelayChains: [relayChain],
     });
 
@@ -48,7 +44,7 @@ export const fetchAllFellows = async (
       getChain({
         provider: SmProvider({
           potentialRelayChains: [relayChain],
-          chainSpec: collectiveChain.chainSpec,
+          chainSpec: polkadot_collectives,
         }),
         keyring: [],
       }),
@@ -77,7 +73,7 @@ export const fetchAllFellows = async (
       getChain({
         provider: SmProvider({
           potentialRelayChains: [relayChain],
-          chainSpec: polkadot.chainSpec,
+          chainSpec: polkadot,
         }),
         keyring: [],
       }),

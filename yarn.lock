@@ -1030,6 +1030,11 @@
   resolved "https://registry.yarnpkg.com/@substrate/connect-known-chains/-/connect-known-chains-1.1.1.tgz#a3d5fadb72e959447a4b50896293437a78ce6ab7"
   integrity sha512-EA3r8lyYKEfVjWqkJnxzE9maVTf14XBzhxfAYJAcdNbaA2aylw/TRL3pLydMs7Dad+oUycGIdmPRDoA/O1cWUg==
 
+"@substrate/connect-known-chains@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@substrate/connect-known-chains/-/connect-known-chains-1.1.2.tgz#987952dd46a87485285b4fd74a3d3051efe90181"
+  integrity sha512-XvyemTVqon+6EF2G7QL0fEXxjuz3nUNFgFV0TSWhSVpPb+Sfs+vfipbEZxGNouxvjCoJdr6CF0rwgGsrrKOnAA==
+
 "@substrate/connect@^0.7.32":
   version "0.7.35"
   resolved "https://registry.yarnpkg.com/@substrate/connect/-/connect-0.7.35.tgz#853d8ff50717a8c9ee8f219d11a86e61a54b88b8"
