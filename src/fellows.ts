@@ -3,7 +3,6 @@
 import { createClient } from "@polkadot-api/client";
 import { getChain } from "@polkadot-api/node-polkadot-provider";
 import { getSmProvider } from "@polkadot-api/sm-provider";
-import { WebSocketProvider } from "@polkadot-api/ws-provider/node";
 import { start } from "smoldot";
 
 import collectiveDescriptor from "./codegen/collectives";
@@ -76,7 +75,10 @@ export const fetchAllFellows = async (
     // We move into the relay chain
     polkadotClient = createClient(
       getChain({
-        provider: WebSocketProvider("wss://rpc.polkadot.io"),
+        provider: SmProvider({
+          potentialRelayChains: [relayChain],
+          chainSpec: polkadot.chainSpec,
+        }),
         keyring: [],
       }),
     );

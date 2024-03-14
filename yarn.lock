@@ -982,7 +982,7 @@
   resolved "https://registry.yarnpkg.com/@polkadot-api/utils/-/utils-0.0.1-a88cc12e054d60b3c599baf69bf41b99204e053d.1.0.tgz#03533d8a23169b3412be1dd56cb6751cb8fbb3f2"
   integrity sha512-VH7EgZtRJWEyl7JmaE3maK3w07Fpj4Lk6hx3NqvQcbbK6LngemkkqIEztOsHHdJPR5QSKtiNPQJXORx72DieJA==
 
-"@polkadot-api/ws-provider@0.0.1-a88cc12e054d60b3c599baf69bf41b99204e053d.1.0", "@polkadot-api/ws-provider@^0.0.1-a88cc12e054d60b3c599baf69bf41b99204e053d.1.0":
+"@polkadot-api/ws-provider@0.0.1-a88cc12e054d60b3c599baf69bf41b99204e053d.1.0":
   version "0.0.1-a88cc12e054d60b3c599baf69bf41b99204e053d.1.0"
   resolved "https://registry.yarnpkg.com/@polkadot-api/ws-provider/-/ws-provider-0.0.1-a88cc12e054d60b3c599baf69bf41b99204e053d.1.0.tgz#d6721245d8af7e31c5ae0ce8c25841ebfb41a13e"
   integrity sha512-1RJsUPnm2gEtiifbu0PNMk64fdG+BvsJhgyamuEgX+HOBCDz8fAD+xxWr4UfVKH3ErdMlrhWNdf4bE17C3TJ3w==
