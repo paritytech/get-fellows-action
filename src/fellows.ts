@@ -49,7 +49,6 @@ export const fetchAllFellows = async (logger: ActionLogger): Promise<FellowObjec
     const collectivesApi = polkadotClient.getTypedApi(collectiveDescriptor);
     const memberEntries =
       await collectivesApi.query.FellowshipCollective.Members.getEntries();
-    console.log("entries are", memberEntries);
 
     // We iterate over the fellow data and convert them into usable values
     const fellows: FellowData[] = [];
