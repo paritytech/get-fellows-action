@@ -56,13 +56,15 @@ export const fetchAllFellows = async (logger: ActionLogger): Promise<FellowObjec
       const [address] = member.keyArgs;
       fellows.push({ address, rank: member.value } as FellowData);
     }
-
     logger.debug(JSON.stringify(fellows));
+
+    // Once we obtained this information, we disconnect this api.
+    polkadotClient.destroy();
+
 
     logger.debug("Connecting to relay parachain.");
 
     // We move into the relay chain
-    polkadotClient.destroy();
     polkadotClient = createClient(getChain({
       provider: WebSocketProvider("wss://rpc.polkadot.io"),
       keyring: []
@@ -70,6 +72,8 @@ export const fetchAllFellows = async (logger: ActionLogger): Promise<FellowObjec
     const relayApi = polkadotClient.getTypedApi(relayDescriptor);
 
     const users: FellowObject[] = [];
+
+     // We iterate over the different members and extract their data
     for (const fellow of fellows) {
       logger.debug(
         `Fetching identity of '${fellow.address}', rank: ${fellow.rank}`,
@@ -88,7 +92,7 @@ export const fetchAllFellows = async (logger: ActionLogger): Promise<FellowObjec
       const additional = fellowData.info.additional;
 
       if (!additional || additional.length < 1) {
-        logger.debug("Aditional data is null. Skipping");
+        logger.debug("Additional data is null. Skipping");
         continue;
       }
 
