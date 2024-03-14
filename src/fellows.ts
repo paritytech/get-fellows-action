@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { ApiPromise, WsProvider } from "@polkadot/api";
 import { createClient } from "@polkadot-api/client";
 import { getChain } from "@polkadot-api/node-polkadot-provider";
 import { getSmProvider } from "@polkadot-api/sm-provider";
@@ -7,7 +6,7 @@ import { WebSocketProvider } from "@polkadot-api/ws-provider/node";
 import { start } from "smoldot";
 
 import collectiveDescriptor from "./codegen/collectives";
-import relayDescriptor, { IdentityTypesData } from "./codegen/relay";
+import relayDescriptor from "./codegen/relay";
 import { ActionLogger } from "./github/types";
 
 const collectiveChain = require("@substrate/connect-known-chains/polkadot_collectives");
@@ -21,19 +20,21 @@ export type FellowObject = {
   rank: number;
 };
 
-export const fetchAllFellowsWithPapi = async (logger: ActionLogger) => {
-  console.log("Fetching fellows with PAPI")
+export const fetchAllFellows = async (logger: ActionLogger): Promise<FellowObject[]> => {
+  logger.info("Initializing smoldot");
   const smoldot = start();
   const SmProvider = getSmProvider(smoldot);
   let polkadotClient: ReturnType<typeof createClient> | null = null;
 
   try {
     const relayChain = await smoldot.addChain({ chainSpec: polkadot.chainSpec })
-
+    logger.debug("Connecting to collective parachain");
     await smoldot.addChain({
       chainSpec: collectiveChain.chainSpec,
       potentialRelayChains: [relayChain]
     })
+
+    logger.info("Initializing PAPI");
     polkadotClient = createClient(
       getChain({
         provider: SmProvider({
@@ -79,7 +80,7 @@ export const fetchAllFellowsWithPapi = async (logger: ActionLogger) => {
 
       let data: FellowObject = { address: fellow.address, rank: fellow.rank };
 
-      // If the identity is null, we ignore it
+      // If the identity is null, we ignore it.
       if (!fellowData) {
         logger.debug("Identity is null. Skipping");
         continue;
@@ -119,95 +120,5 @@ export const fetchAllFellowsWithPapi = async (logger: ActionLogger) => {
       polkadotClient.destroy();
     }
     await smoldot.terminate();
-  }
-};
-
-export const fetchAllFellows = async (
-  logger: ActionLogger,
-): Promise<FellowObject[]> => {
-  let api: ApiPromise;
-  logger.debug("Connecting to collective parachain");
-  // we connect to the collective rpc node
-  const wsProvider = new WsProvider(
-    "wss://polkadot-collectives-rpc.polkadot.io",
-  );
-  api = await ApiPromise.create({ provider: wsProvider });
-  try {
-    // We fetch all the members
-    const membersObj = await api.query.fellowshipCollective.members.entries();
-
-    // We iterate over the fellow data and convert them into usable values
-    const fellows: FellowData[] = [];
-    for (const [key, rank] of membersObj) {
-      // @ts-ignore
-      const [address]: [string] = key.toHuman();
-      fellows.push({ address, ...(rank.toHuman() as object) } as FellowData);
-    }
-    logger.debug(JSON.stringify(fellows));
-
-    // Once we obtained this information, we disconnect this api.
-    await api.disconnect();
-
-    logger.debug("Connecting to relay parachain.");
-    // We connect to the relay chain
-    api = await ApiPromise.create({
-      provider: new WsProvider("wss://rpc.polkadot.io"),
-    });
-
-    // We iterate over the different members and extract their data
-    const users: FellowObject[] = [];
-    for (const fellow of fellows) {
-      logger.debug(
-        `Fetching identity of '${fellow.address}', rank: ${fellow.rank}`,
-      );
-      const fellowData = (
-        await api.query.identity.identityOf(fellow.address)
-      ).toHuman() as Record<string, unknown> | undefined;
-
-      let data: FellowObject = { address: fellow.address, rank: fellow.rank };
-
-      // If the identity is null, we ignore it.
-      if (!fellowData) {
-        logger.debug("Identity is null. Skipping");
-        continue;
-      }
-
-      // @ts-ignore
-      const additional = fellowData.info.additional as
-        | [{ Raw: string }, { Raw: string }][]
-        | undefined;
-
-      // If it does not have additional data (GitHub handle goes here) we ignore it
-      if (!additional || additional.length < 1) {
-        logger.debug("Additional data is null. Skipping");
-        continue;
-      }
-
-      for (const additionalData of additional) {
-        const [key, value] = additionalData;
-        // We verify that they have an additional data of the key "github"
-        // If it has a handle defined, we push it into the array
-        if (
-          key?.Raw &&
-          key?.Raw === "github" &&
-          value?.Raw &&
-          value?.Raw.length > 0
-        ) {
-          logger.debug(`Found handles: '${value.Raw}'`);
-          // We add it to the array and remove the @ if they add it to the handle
-          data = { ...data, githubHandle: value.Raw.replace("@", "") };
-        }
-      }
-      users.push(data);
-    }
-
-    logger.info(`Found users: ${JSON.stringify(Array.from(users.entries()))}`);
-
-    return users;
-  } catch (error) {
-    logger.error(error as Error);
-    throw error;
-  } finally {
-    await api.disconnect();
   }
 };
