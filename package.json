@@ -28,8 +28,11 @@
     "@polkadot-api/cli": "^0.0.1-a88cc12e054d60b3c599baf69bf41b99204e053d.1.0",
     "@polkadot-api/client": "^0.0.1-a88cc12e054d60b3c599baf69bf41b99204e053d.1.0",
     "@polkadot-api/node-polkadot-provider": "^0.0.1-a88cc12e054d60b3c599baf69bf41b99204e053d.1.0",
+    "@polkadot-api/sm-provider": "^0.0.1-2ade456e6ac9a1106b115cb8f44eed4f897e6017.1.0",
     "@polkadot-api/ws-provider": "^0.0.1-a88cc12e054d60b3c599baf69bf41b99204e053d.1.0",
-    "@polkadot/api": "^10.9.1"
+    "@polkadot/api": "^10.9.1",
+    "@substrate/connect-known-chains": "^1.1.1",
+    "smoldot": "^2.0.22"
   },
   "devDependencies": {
     "@eng-automation/js-style": "^2.3.0",
