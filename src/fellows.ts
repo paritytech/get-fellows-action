@@ -104,6 +104,7 @@ export const fetchAllFellows = async (
 
       const additional = fellowData.info.additional;
 
+      // If it does not have additional data (GitHub handle goes here) we ignore it
       // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
       if (!additional || additional.length < 1) {
         logger.debug("Additional data is null. Skipping");
