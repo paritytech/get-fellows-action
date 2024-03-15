@@ -58,8 +58,10 @@ export const fetchAllFellows = async (
     // We iterate over the fellow data and convert them into usable values
     const fellows: FellowData[] = [];
     for (const member of memberEntries) {
-      const [address] = member.keyArgs;
-      fellows.push({ address, rank: member.value });
+      if (member.value > 0) {
+        const [address] = member.keyArgs;
+        fellows.push({ address, rank: member.value });
+      }
     }
     logger.debug(JSON.stringify(fellows));
 
