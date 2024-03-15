@@ -17,8 +17,8 @@ const mapFellows = async (fellows: FellowObject[]) => {
 
   const table:SummaryTableRow[] = [[{header: true, data:"Address", }, {header:true,data:"GitHub Handle"}, {header:true, data:"Rank"}]];
 
-  for (const fellow of fellows.sort(f => f.rank)){
-    table.push([fellow.address, `@${fellow.githubHandle}`, `\`fellow.rank\``]);
+  for (const fellow of fellows.sort(f => f.rank)) {
+    table.push([fellow.address, `@${fellow.githubHandle}`, `\`${fellow.rank}\``]);
   }
 
   await summary.addHeading("Fellows")
