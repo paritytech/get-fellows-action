@@ -57,7 +57,7 @@ export const fetchAllFellows = async (
     const fellows: FellowData[] = [];
     for (const member of memberEntries) {
       const [address] = member.keyArgs;
-      fellows.push({ address, rank: member.value } as FellowData);
+      fellows.push({ address, rank: member.value });
     }
     logger.debug(JSON.stringify(fellows));
 
