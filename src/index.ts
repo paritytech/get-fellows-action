@@ -24,13 +24,14 @@ const mapFellows = async (fellows: FellowObject[]) => {
   await summary.addHeading("Fellows")
   .addTable(table)
   .write();
+
+  // TODO: Remove this once https://github.com/polkadot-api/polkadot-api/issues/327 is fixed
+  process.exit(0);
 };
 
 fetchAllFellows(logger)
   .then(mapFellows)
-  .catch(setFailed)
-  .finally(() => {
-    logger.info("Shutting down application");
-    // TODO: Remove this once https://github.com/polkadot-api/polkadot-api/issues/327 is fixed
-    process.exit(0);
+  .catch((err) => {
+    setFailed(err);
+    process.exit(1)
   });
