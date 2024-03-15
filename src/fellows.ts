@@ -25,6 +25,8 @@ export const fetchAllFellows = async (
   logger.info("Initializing smoldot");
   const smoldot = start();
   const SmProvider = getSmProvider(smoldot);
+
+  // TODO: Replace once https://github.com/paritytech/opstooling/discussions/373 is fixed
   let polkadotClient: ReturnType<typeof createClient> | null = null;
 
   try {
