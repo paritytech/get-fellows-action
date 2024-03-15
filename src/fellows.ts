@@ -100,12 +100,16 @@ export const fetchAllFellows = async (
       // If the identity is null, we check if there is a super identity.
       if (!fellowData) {
         logger.debug("Identity is null. Checking for super identity");
-        const superIdentity = await relayApi.query.Identity.SuperOf.getValue(fellow.address);
-        if (superIdentity && superIdentity[0]) {
+        const superIdentity = await relayApi.query.Identity.SuperOf.getValue(
+          fellow.address,
+        );
+        if (superIdentity) {
           const [address] = superIdentity;
-          logger.debug(`${fellow.address} has a super identity: ${address}. Adding it to the array`);
+          logger.debug(
+            `${fellow.address} has a super identity: ${address}. Adding it to the array`,
+          );
 
-          fellows.push({address, rank: fellow.rank});
+          fellows.push({ address, rank: fellow.rank });
         } else {
           logger.debug("No super identity found. Skipping");
         }
