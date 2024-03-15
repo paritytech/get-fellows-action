@@ -9,7 +9,7 @@ const logger = generateCoreLogger();
 const mapFellows = async (fellows: FellowObject[]) => {
   setOutput("fellows", JSON.stringify(fellows));
   const githubHandles = fellows
-    .map(({githubHandle}) => githubHandle)
+    .map(({ githubHandle }) => githubHandle)
     .filter((handle) => !!handle)
     .join(",");
   setOutput("github-handles", githubHandles);
@@ -23,13 +23,13 @@ const mapFellows = async (fellows: FellowObject[]) => {
   ];
 
   for (const fellow of fellows.sort((old, { rank }) => rank - old.rank)) {
-    if(fellow.githubHandle){
-    table.push([
-      fellow.rank.toString(),
-      `@${fellow.githubHandle}`,
-      fellow.address,
-    ]);
-  }
+    if (fellow.githubHandle) {
+      table.push([
+        fellow.rank.toString(),
+        `@${fellow.githubHandle}`,
+        fellow.address,
+      ]);
+    }
   }
 
   await summary.addHeading("Fellows").addTable(table).write();
