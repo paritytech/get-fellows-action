@@ -16,17 +16,17 @@ const mapFellows = async (fellows: FellowObject[]) => {
 
   const table: SummaryTableRow[] = [
     [
-      { header: true, data: "Address" },
-      { header: true, data: "GitHub Handle" },
       { header: true, data: "Rank" },
+      { header: true, data: "GitHub Handle" },
+      { header: true, data: "Address" },
     ],
   ];
 
-  for (const fellow of fellows.sort((old, newF) => old.rank - newF.rank)) {
+  for (const fellow of fellows.sort((old, {rank}) => rank - old.rank)) {
     table.push([
-      fellow.address,
-      `@${fellow.githubHandle ?? " ERROR"}`,
       fellow.rank.toString(),
+      `@${fellow.githubHandle ?? " ERROR"}`,
+      fellow.address,
     ]);
   }
 
