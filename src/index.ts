@@ -26,7 +26,7 @@ const mapFellows = async (fellows: FellowObject[]) => {
     table.push([
       fellow.address,
       `@${fellow.githubHandle ?? " ERROR"}`,
-      `\`${fellow.rank}\``,
+      fellow.rank.toString(),
     ]);
   }
 
