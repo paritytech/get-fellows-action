@@ -1,6 +1,6 @@
 {
   "name": "get-fellows-action",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Fetch all the GitHub handles from the Fellows",
   "main": "src/index.ts",
   "scripts": {
