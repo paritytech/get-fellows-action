@@ -9,8 +9,8 @@ const logger = generateCoreLogger();
 const mapFellows = async (fellows: FellowObject[]) => {
   setOutput("fellows", JSON.stringify(fellows));
   const githubHandles = fellows
-    .map((f) => f.githubHandle)
-    .filter((f) => !!f)
+    .map(({githubHandle}) => githubHandle)
+    .filter((handle) => !!handle)
     .join(",");
   setOutput("github-handles", githubHandles);
 
