@@ -12,6 +12,7 @@ jobs:
         command: [lint, build, test]
     runs-on: ubuntu-latest
     name: running ${{ matrix.command }}
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4.1.1
       - uses: actions/setup-node@v4.0.2

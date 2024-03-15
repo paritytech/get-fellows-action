@@ -14,4 +14,11 @@ const mapFellows = (fellows: FellowObject[]) => {
   setOutput("github-handles", githubHandles);
 };
 
-fetchAllFellows(logger).then(mapFellows).catch(setFailed);
+fetchAllFellows(logger)
+  .then(mapFellows)
+  .catch(setFailed)
+  .finally(() => {
+    logger.info("Shutting down application");
+    // TODO: Remove this once https://github.com/polkadot-api/polkadot-api/issues/327 is fixed
+    process.exit(0);
+  });

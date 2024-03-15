@@ -9,3 +9,6 @@
 !.vscode/extensions.json
 !.vscode/settings.json
 .idea
+
+# Papi
+src/codegen
