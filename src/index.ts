@@ -22,12 +22,14 @@ const mapFellows = async (fellows: FellowObject[]) => {
     ],
   ];
 
-  for (const fellow of fellows.sort((old, {rank}) => rank - old.rank)) {
+  for (const fellow of fellows.sort((old, { rank }) => rank - old.rank)) {
+    if(fellow.githubHandle){
     table.push([
       fellow.rank.toString(),
-      `@${fellow.githubHandle ?? " ERROR"}`,
+      `@${fellow.githubHandle}`,
       fellow.address,
     ]);
+  }
   }
 
   await summary.addHeading("Fellows").addTable(table).write();
