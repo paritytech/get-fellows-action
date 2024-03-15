@@ -1,8 +1,8 @@
 import { setFailed, setOutput, summary } from "@actions/core";
+import { SummaryTableRow } from "@actions/core/lib/summary";
 
 import { FellowObject, fetchAllFellows } from "./fellows";
 import { generateCoreLogger } from "./util";
-import { SummaryTableRow } from "@actions/core/lib/summary";
 
 const logger = generateCoreLogger();
 
@@ -14,16 +14,23 @@ const mapFellows = async (fellows: FellowObject[]) => {
     .join(",");
   setOutput("github-handles", githubHandles);
 
+  const table: SummaryTableRow[] = [
+    [
+      { header: true, data: "Address" },
+      { header: true, data: "GitHub Handle" },
+      { header: true, data: "Rank" },
+    ],
+  ];
 
-  const table:SummaryTableRow[] = [[{header: true, data:"Address", }, {header:true,data:"GitHub Handle"}, {header:true, data:"Rank"}]];
-
-  for (const fellow of fellows.sort(f => f.rank)) {
-    table.push([fellow.address, `@${fellow.githubHandle}`, `\`${fellow.rank}\``]);
+  for (const fellow of fellows.sort((f) => f.rank)) {
+    table.push([
+      fellow.address,
+      `@${fellow.githubHandle ?? " ERROR"}`,
+      `\`${fellow.rank}\``,
+    ]);
   }
 
-  await summary.addHeading("Fellows")
-  .addTable(table)
-  .write();
+  await summary.addHeading("Fellows").addTable(table).write();
 
   // TODO: Remove this once https://github.com/polkadot-api/polkadot-api/issues/327 is fixed
   process.exit(0);
@@ -32,6 +39,6 @@ const mapFellows = async (fellows: FellowObject[]) => {
 fetchAllFellows(logger)
   .then(mapFellows)
   .catch((err) => {
-    setFailed(err);
-    process.exit(1)
+    setFailed(err as Error);
+    process.exit(1);
   });
