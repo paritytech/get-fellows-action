@@ -22,7 +22,7 @@ const mapFellows = async (fellows: FellowObject[]) => {
     ],
   ];
 
-  for (const fellow of fellows.sort((f) => f.rank)) {
+  for (const fellow of fellows.sort((old, newF) => old.rank - newF.rank)) {
     table.push([
       fellow.address,
       `@${fellow.githubHandle ?? " ERROR"}`,
