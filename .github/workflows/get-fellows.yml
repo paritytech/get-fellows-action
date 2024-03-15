@@ -1,0 +1,19 @@
+name: Mention fellows
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  mention-fellows:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: paritytech/get-fellows-action@main
+        id: fellows
+      - name: Mention them
+        run: |
+          echo "The fellows are $FELLOWS"
+        env:
+          # the handles of the fellows separated by commas
+          FELLOWS: ${{ steps.fellows.outputs.github-handles }}"
