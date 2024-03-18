@@ -7,7 +7,7 @@
     "start": "node dist",
     "build": "ncc build --license LICENSE",
     "postinstall": "papi",
-    "test": "jest --forceExit",
+    "test": "jest",
     "fix": "eslint --fix 'src/**/*'",
     "lint": "eslint 'src/**/*'"
   },
