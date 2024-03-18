@@ -32,15 +32,7 @@ const mapFellows = async (fellows: FellowObject[]) => {
     }
   }
 
-  await summary.addHeading("Fellows").addTable(table).write();
-
-  // TODO: Remove this once https://github.com/polkadot-api/polkadot-api/issues/327 is fixed
-  process.exit(0);
+  return await summary.addHeading("Fellows").addTable(table).write();
 };
 
-fetchAllFellows(logger)
-  .then(mapFellows)
-  .catch((err) => {
-    setFailed(err as Error);
-    process.exit(1);
-  });
+fetchAllFellows(logger).then(mapFellows).catch(setFailed);

@@ -26,6 +26,7 @@ on: [push]
 jobs:
   mention-fellows:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: paritytech/get-fellows-action
         id: fellows
