@@ -8,6 +8,7 @@ on:
 jobs:
   mention-fellows:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: paritytech/get-fellows-action@main
         id: fellows
