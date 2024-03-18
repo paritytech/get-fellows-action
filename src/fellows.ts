@@ -24,7 +24,6 @@ export const fetchAllFellows = async (
 ): Promise<FellowObject[]> => {
   logger.info("Initializing smoldot");
   const smoldot = start();
-  const SmProvider = getSmProvider(smoldot);
 
   // TODO: Replace once https://github.com/paritytech/opstooling/discussions/373 is fixed
   let polkadotClient: ReturnType<typeof createClient> | null = null;
@@ -39,13 +38,12 @@ export const fetchAllFellows = async (
       potentialRelayChains: [relayChain],
     });
 
+
+  const SmProviderCollectives = getSmProvider(smoldot, polkadot_collectives);
     logger.info("Initializing PAPI");
     polkadotClient = createClient(
       getChain({
-        provider: SmProvider({
-          potentialRelayChains: [relayChain],
-          chainSpec: polkadot_collectives,
-        }),
+        provider: SmProviderCollectives,
         keyring: [],
       }),
     );
@@ -72,12 +70,10 @@ export const fetchAllFellows = async (
     logger.debug("Connecting to relay parachain.");
 
     // We move into the relay chain
+  const SmProviderRelay = getSmProvider(smoldot, polkadot);
     polkadotClient = createClient(
       getChain({
-        provider: SmProvider({
-          potentialRelayChains: [relayChain],
-          chainSpec: polkadot,
-        }),
+        provider: SmProviderRelay,
         keyring: [],
       }),
     );
