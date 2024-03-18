@@ -38,8 +38,10 @@ export const fetchAllFellows = async (
       potentialRelayChains: [relayChain],
     });
 
-
-  const SmProviderCollectives = getSmProvider(smoldot, polkadot_collectives);
+    const SmProviderCollectives = getSmProvider(smoldot, {
+      potentialRelayChains: [relayChain],
+      chainSpec: polkadot_collectives,
+    });
     logger.info("Initializing PAPI");
     polkadotClient = createClient(
       getChain({
@@ -70,7 +72,10 @@ export const fetchAllFellows = async (
     logger.debug("Connecting to relay parachain.");
 
     // We move into the relay chain
-  const SmProviderRelay = getSmProvider(smoldot, polkadot);
+    const SmProviderRelay = getSmProvider(smoldot, {
+      potentialRelayChains: [relayChain],
+      chainSpec: polkadot,
+    });
     polkadotClient = createClient(
       getChain({
         provider: SmProviderRelay,
