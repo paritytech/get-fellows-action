@@ -35,6 +35,4 @@ const mapFellows = async (fellows: FellowObject[]) => {
   return await summary.addHeading("Fellows").addTable(table).write();
 };
 
-fetchAllFellows(logger)
-  .then(mapFellows)
-  .catch(setFailed);
+fetchAllFellows(logger).then(mapFellows).catch(setFailed);
