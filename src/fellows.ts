@@ -1,4 +1,4 @@
-import { createClient } from "@polkadot-api/client";
+import { createClient, PolkadotClient } from "@polkadot-api/client";
 import { getChain } from "@polkadot-api/node-polkadot-provider";
 import { getSmProvider } from "@polkadot-api/sm-provider";
 import {
@@ -25,8 +25,7 @@ export const fetchAllFellows = async (
   logger.info("Initializing smoldot");
   const smoldot = start();
 
-  // TODO: Replace once https://github.com/paritytech/opstooling/discussions/373 is fixed
-  let polkadotClient: ReturnType<typeof createClient> | null = null;
+  let polkadotClient: PolkadotClient | null = null;
 
   try {
     const relayChain = await smoldot.addChain({
