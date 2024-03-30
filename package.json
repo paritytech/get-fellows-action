@@ -25,12 +25,12 @@
     "@actions/core": "^1.10.1",
     "@actions/github": "^5.1.1",
     "@octokit/webhooks-types": "^7.3.1",
-    "@polkadot-api/cli": "^0.0.1-b0f30456ec8e18fce96b1a2a2a9f7418a4f5b837.1.0",
-    "@polkadot-api/client": "^0.0.1-b0f30456ec8e18fce96b1a2a2a9f7418a4f5b837.1.0",
-    "@polkadot-api/node-polkadot-provider": "^0.0.1-b0f30456ec8e18fce96b1a2a2a9f7418a4f5b837.1.0",
-    "@polkadot-api/sm-provider": "^0.0.1-b0f30456ec8e18fce96b1a2a2a9f7418a4f5b837.1.0",
+    "@polkadot-api/cli": "0.0.1-28172e65e6c4fb53198b9932ff624f8eef05fe68.1.0",
+    "@polkadot-api/client": "0.0.1-28172e65e6c4fb53198b9932ff624f8eef05fe68.1.0",
+    "@polkadot-api/node-polkadot-provider": "0.0.1-28172e65e6c4fb53198b9932ff624f8eef05fe68.1.0",
+    "@polkadot-api/sm-provider": "0.0.1-28172e65e6c4fb53198b9932ff624f8eef05fe68.1.0",
     "@substrate/connect-known-chains": "^1.1.2",
-    "smoldot": "^2.0.22"
+    "smoldot": "2.0.22"
   },
   "devDependencies": {
     "@eng-automation/js-style": "^2.3.0",
