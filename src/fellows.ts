@@ -1,4 +1,4 @@
-import { SS58String, TypedApi, createClient } from "@polkadot-api/client";
+import { createClient, SS58String } from "@polkadot-api/client";
 import { getChain } from "@polkadot-api/node-polkadot-provider";
 import { getSmProvider } from "@polkadot-api/sm-provider";
 import {
@@ -55,7 +55,7 @@ export const fetchAllFellows = async (
       const superIdentityAddress = (
         await relayApi.query.Identity.SuperOf.getValue(address)
       )?.[0];
-      return superIdentityAddress && getGhHandle(superIdentityAddress);
+      return await (superIdentityAddress && getGhHandle(superIdentityAddress));
     };
 
     logger.info("Initializing the collectives client");
@@ -76,7 +76,9 @@ export const fetchAllFellows = async (
 
     // Build the Array of FellowData and filter out candidates (zero rank members)
     const fellows: FellowData[] = memberEntries
-      .map(({ keyArgs: [address], value: rank }) => ({ address, rank }))
+      .map(({ keyArgs: [address], value: rank }) => {
+        return { address, rank };
+      })
       .filter(({ rank }) => rank > 0);
     logger.debug(JSON.stringify(fellows));
 
@@ -85,11 +87,13 @@ export const fetchAllFellows = async (
 
     // Let's now pull the GH handles of the fellows
     const users: FellowObject[] = await Promise.all(
-      fellows.map(async ({ address, rank }) => ({
-        address,
-        rank,
-        githubHandle: await getGhHandle(address),
-      })),
+      fellows.map(async ({ address, rank }) => {
+        return {
+          address,
+          rank,
+          githubHandle: await getGhHandle(address),
+        };
+      }),
     );
     logger.info(`Found users: ${JSON.stringify(Array.from(users.entries()))}`);
 
