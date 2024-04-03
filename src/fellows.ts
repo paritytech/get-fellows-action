@@ -43,19 +43,40 @@ export const fetchAllFellows = async (
     const getGhHandle = async (
       address: SS58String,
     ): Promise<string | undefined> => {
+      logger.debug(`Fetching identity of '${address}'`);
       const identity =
         await relayApi.query.Identity.IdentityOf.getValue(address);
 
-      if (identity)
-        return identity.info.additional
+      if (identity) {
+        const handle = identity.info.additional
           .find(([key]) => key.value?.asText() === "github")?.[1]
           .value?.asText()
           .replace("@", "");
+        if (handle) {
+          logger.info(`Found github handle for '${address}': '${handle}'`);
+        } else {
+          logger.debug(`'${address}' does not have a GitHub handle`);
+        }
+        return handle;
+      }
+
+      logger.debug(
+        `Identity of '${address}' is null. Checking for super identity`,
+      );
 
       const superIdentityAddress = (
         await relayApi.query.Identity.SuperOf.getValue(address)
       )?.[0];
-      return await (superIdentityAddress && getGhHandle(superIdentityAddress));
+
+      if (superIdentityAddress) {
+        logger.debug(
+          `'${address}' has a super identity: '${superIdentityAddress}'. Fetching that identity`,
+        );
+        return await getGhHandle(superIdentityAddress);
+      } else {
+        logger.debug(`No superidentity for ${address} found.`);
+        return undefined;
+      }
     };
 
     logger.info("Initializing the collectives client");
