@@ -1,15 +1,11 @@
-import { createClient, SS58String } from "@polkadot-api/client";
-import { getChain } from "@polkadot-api/node-polkadot-provider";
-import { getSmProvider } from "@polkadot-api/sm-provider";
-import {
-  polkadot,
-  polkadot_collectives,
-} from "@substrate/connect-known-chains";
 import { start } from "smoldot";
 
-import collectiveDescriptor from "./codegen/collectives";
-import relayDescriptor from "./codegen/relay";
+import { SS58String, createClient } from "polkadot-api";
+import { getSmProvider } from "polkadot-api/sm-provider";
+import { relay, collectives } from "@polkadot-api/descriptors";
 import { ActionLogger } from "./github/types";
+import polkadot_chain from "polkadot-api/chains/polkadot";
+import collectives_chain from "polkadot-api/chains/polkadot_collectives";
 
 type FellowData = { address: string; rank: number };
 
@@ -26,19 +22,19 @@ export const fetchAllFellows = async (
   const smoldot = start();
 
   try {
-    const relayChain = await smoldot.addChain({
-      chainSpec: polkadot,
-      disableJsonRpc: true,
-    });
+    const smoldotRelayChain = await smoldot.addChain({ chainSpec: polkadot_chain.chainSpec, disableJsonRpc: true });
 
+    const jsonRpcProvider = getSmProvider(smoldotRelayChain);
     logger.info("Initializing the relay client");
-    const relayClient = createClient(
-      getChain({
-        provider: getSmProvider(smoldot, polkadot),
-        keyring: [],
-      }),
-    );
-    const relayApi = relayClient.getTypedApi(relayDescriptor);
+    const polkadotClient = createClient(jsonRpcProvider);
+
+    // const relayClient = createClient(
+    //   getChain({
+    //     provider: getSmProvider(smoldot, polkadot),
+    //     keyring: [],
+    //   }),
+    // );
+    const relayApi = polkadotClient.getTypedApi(relay);
 
     const getGhHandle = async (
       address: SS58String,
@@ -79,17 +75,24 @@ export const fetchAllFellows = async (
       }
     };
 
+    polkadotClient.destroy();
+
     logger.info("Initializing the collectives client");
-    const collectivesClient = createClient(
-      getChain({
-        provider: getSmProvider(smoldot, {
-          potentialRelayChains: [relayChain],
-          chainSpec: polkadot_collectives,
-        }),
-        keyring: [],
-      }),
-    );
-    const collectivesApi = collectivesClient.getTypedApi(collectiveDescriptor);
+
+    const collectiveRelayChain = await smoldot.addChain({ chainSpec: collectives_chain.chainSpec });
+    const collectiveJsonRpcProvider = getSmProvider(collectiveRelayChain);
+    logger.info("Initializing the relay client");
+    const collectivesClient = createClient(collectiveJsonRpcProvider);
+    // const collectivesClient = createClient(
+    //   getChain({
+    //     provider: getSmProvider(smoldot, {
+    //       potentialRelayChains: [relayChain],
+    //       chainSpec: polkadot_collectives,
+    //     }),
+    //     keyring: [],
+    //   }),
+    // );
+    const collectivesApi = collectivesClient.getTypedApi(collectives);
 
     // Pull the members of the FellowshipCollective
     const memberEntries =
@@ -119,7 +122,7 @@ export const fetchAllFellows = async (
     logger.info(`Found users: ${JSON.stringify(Array.from(users.entries()))}`);
 
     // We are now done with the relay client
-    relayClient.destroy();
+    collectivesClient.destroy();
 
     return users;
   } catch (error) {
