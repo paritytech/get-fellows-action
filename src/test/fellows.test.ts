@@ -1,14 +1,15 @@
-import { mock, MockProxy } from "jest-mock-extended";
+import { describe, expect, test } from "vitest";
 
 import { fetchAllFellows } from "../fellows";
 import { ActionLogger } from "../github/types";
 
 describe("Fellows test", () => {
-  let logger: MockProxy<ActionLogger>;
-
-  beforeEach(() => {
-    logger = mock<ActionLogger>();
-  });
+  const logger: ActionLogger = {
+    debug: (_: string): void => {},
+    info: (_: string): void => {},
+    warn: (_: string | Error): void => {},
+    error: (_: string | Error): void => {},
+  };
 
   test("Should fetch fellows", async () => {
     const members = await fetchAllFellows(logger);

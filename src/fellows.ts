@@ -1,14 +1,10 @@
-import { createClient, SS58String } from "@polkadot-api/client";
-import { getChain } from "@polkadot-api/node-polkadot-provider";
-import { getSmProvider } from "@polkadot-api/sm-provider";
-import {
-  polkadot,
-  polkadot_collectives,
-} from "@substrate/connect-known-chains";
+import { collectives, polkadot } from "@polkadot-api/descriptors";
+import { Binary, createClient, SS58String } from "polkadot-api";
+import { chainSpec as polkadotChainSpec } from "polkadot-api/chains/polkadot";
+import { chainSpec as collectivesChainSpec } from "polkadot-api/chains/polkadot_collectives";
+import { getSmProvider } from "polkadot-api/sm-provider";
 import { start } from "smoldot";
 
-import collectiveDescriptor from "./codegen/collectives";
-import relayDescriptor from "./codegen/relay";
 import { ActionLogger } from "./github/types";
 
 type FellowData = { address: string; rank: number };
@@ -26,19 +22,15 @@ export const fetchAllFellows = async (
   const smoldot = start();
 
   try {
-    const relayChain = await smoldot.addChain({
-      chainSpec: polkadot,
-      disableJsonRpc: true,
+    const smoldotRelayChain = await smoldot.addChain({
+      chainSpec: polkadotChainSpec,
     });
 
+    const jsonRpcProvider = getSmProvider(smoldotRelayChain);
     logger.info("Initializing the relay client");
-    const relayClient = createClient(
-      getChain({
-        provider: getSmProvider(smoldot, polkadot),
-        keyring: [],
-      }),
-    );
-    const relayApi = relayClient.getTypedApi(relayDescriptor);
+    const polkadotClient = createClient(jsonRpcProvider);
+
+    const relayApi = polkadotClient.getTypedApi(polkadot);
 
     const getGhHandle = async (
       address: SS58String,
@@ -48,14 +40,26 @@ export const fetchAllFellows = async (
         await relayApi.query.Identity.IdentityOf.getValue(address);
 
       if (identity) {
-        const handle = identity.info.additional
-          .find(([key]) => key.value?.asText() === "github")?.[1]
-          .value?.asText()
+        const additional = identity[0].info.additional.find(
+          ([key]) => (key.value as Binary)?.asText() === "github",
+        );
+
+        if (!additional) {
+          logger.debug(
+            `'${address}' does not have an additional field named 'github'`,
+          );
+          return;
+        }
+
+        const handle = (additional[1].value as Binary)
+          .asText()
           .replace("@", "");
+
         if (handle) {
           logger.info(`Found github handle for '${address}': '${handle}'`);
         } else {
           logger.debug(`'${address}' does not have a GitHub handle`);
+          return;
         }
         return handle;
       }
@@ -80,20 +84,22 @@ export const fetchAllFellows = async (
     };
 
     logger.info("Initializing the collectives client");
-    const collectivesClient = createClient(
-      getChain({
-        provider: getSmProvider(smoldot, {
-          potentialRelayChains: [relayChain],
-          chainSpec: polkadot_collectives,
-        }),
-        keyring: [],
-      }),
-    );
-    const collectivesApi = collectivesClient.getTypedApi(collectiveDescriptor);
+
+    const collectiveRelayChain = await smoldot.addChain({
+      chainSpec: collectivesChainSpec,
+      potentialRelayChains: [smoldotRelayChain],
+    });
+    const collectiveJsonRpcProvider = getSmProvider(collectiveRelayChain);
+    logger.info("Initializing the relay client");
+    const collectivesClient = createClient(collectiveJsonRpcProvider);
+    const collectivesApi = collectivesClient.getTypedApi(collectives);
 
     // Pull the members of the FellowshipCollective
     const memberEntries =
       await collectivesApi.query.FellowshipCollective.Members.getEntries();
+
+    // We no longer need the collective client, so let's destroy it
+    collectivesClient.destroy();
 
     // Build the Array of FellowData and filter out candidates (zero rank members)
     const fellows: FellowData[] = memberEntries
@@ -102,9 +108,6 @@ export const fetchAllFellows = async (
       })
       .filter(({ rank }) => rank > 0);
     logger.debug(JSON.stringify(fellows));
-
-    // We no longer need the collectives client, so let's destroy it
-    collectivesClient.destroy();
 
     // Let's now pull the GH handles of the fellows
     const users: FellowObject[] = await Promise.all(
@@ -119,7 +122,7 @@ export const fetchAllFellows = async (
     logger.info(`Found users: ${JSON.stringify(Array.from(users.entries()))}`);
 
     // We are now done with the relay client
-    relayClient.destroy();
+    polkadotClient.destroy();
 
     return users;
   } catch (error) {

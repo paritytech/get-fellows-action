@@ -1,11 +1,9 @@
 {
-  "relay": {
-    "outputFolder": "src/codegen",
-    "chain": "polkadot",
-    "metadata": "relay.scale"
+  "polkadot": {
+    "wsUrl": "wss://rpc.polkadot.io",
+    "metadata": "polkadot.scale"
   },
   "collectives": {
-    "outputFolder": "src/codegen",
     "wsUrl": "wss://polkadot-collectives-rpc.polkadot.io",
     "metadata": "collectives.scale"
   }
