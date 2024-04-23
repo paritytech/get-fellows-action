@@ -98,6 +98,9 @@ export const fetchAllFellows = async (
     const memberEntries =
       await collectivesApi.query.FellowshipCollective.Members.getEntries();
 
+    // We no longer need the collective client, so let's destroy it
+    collectivesClient.destroy();
+
     // Build the Array of FellowData and filter out candidates (zero rank members)
     const fellows: FellowData[] = memberEntries
       .map(({ keyArgs: [address], value: rank }) => {
@@ -105,10 +108,6 @@ export const fetchAllFellows = async (
       })
       .filter(({ rank }) => rank > 0);
     logger.debug(JSON.stringify(fellows));
-
-    // We no longer need the clients, so let's destroy them
-    polkadotClient.destroy();
-    collectivesClient.destroy();
 
     // Let's now pull the GH handles of the fellows
     const users: FellowObject[] = await Promise.all(
@@ -123,7 +122,7 @@ export const fetchAllFellows = async (
     logger.info(`Found users: ${JSON.stringify(Array.from(users.entries()))}`);
 
     // We are now done with the relay client
-    collectivesClient.destroy();
+    polkadotClient.destroy();
 
     return users;
   } catch (error) {
