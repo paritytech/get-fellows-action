@@ -12,7 +12,6 @@ const mapFellows = async (fellows: FellowObject[]) => {
     .map(({ githubHandle }) => githubHandle)
     .filter((handle) => !!handle)
     .join(",");
-  console.log("Fellows", fellows);
   setOutput("github-handles", githubHandles);
 
   const table: SummaryTableRow[] = [
