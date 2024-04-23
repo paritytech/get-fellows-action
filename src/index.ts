@@ -1,5 +1,4 @@
-import { setFailed, setOutput, summary } from "@actions/core";
-import { SummaryTableRow } from "@actions/core/lib/summary";
+import { setFailed } from "@actions/core";
 
 import { fetchIdentity } from "./experiment";
 import { generateCoreLogger } from "./util";
@@ -36,5 +35,7 @@ const mapFellows = async (fellows: FellowObject[]) => {
 };
 */
 
-fetchIdentity(logger).then(() => console.log("Done")).catch(setFailed);
+fetchIdentity(console)
+  .then(() => console.log("Done"))
+  .catch(setFailed);
 // fetchAllFellows(logger).then(mapFellows).catch(setFailed);

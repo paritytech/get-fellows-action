@@ -6,9 +6,7 @@ import polkadot_chain, {
 import { getSmProvider } from "polkadot-api/sm-provider";
 import { start } from "smoldot";
 
-import { ActionLogger } from "./github/types";
-
-export const fetchIdentity = async (logger: ActionLogger): Promise<any> => {
+export const fetchIdentity = async (logger: typeof console): Promise<any> => {
     console.log("polkadot chain", polkadot_chain);
     logger.info("Initializing smoldot");
     const smoldot = start();
