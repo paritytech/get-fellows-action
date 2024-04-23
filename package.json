@@ -28,12 +28,9 @@
     "smoldot": "2.0.22"
   },
   "devDependencies": {
-    "@eng-automation/js-style": "^2.3.0",
+    "@eng-automation/js-style": "^2.3.1",
     "@vercel/ncc": "^0.38.0",
     "typescript": "^5.2.2",
     "vitest": "^1.5.0"
-  },
-  "resolutions": {
-    "eslint/strip-ansi": "6.0.1"
   }
 }
