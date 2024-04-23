@@ -1,11 +1,11 @@
-/*import { start } from "smoldot";
-
-import { SS58String, createClient } from "polkadot-api";
+import { collectives, polkadot } from "@polkadot-api/descriptors";
+import { Binary, createClient, SS58String } from "polkadot-api";
+import { chainSpec as polkadotChainSpec } from "polkadot-api/chains/polkadot";
+import { chainSpec as collectivesChainSpec } from "polkadot-api/chains/polkadot_collectives";
 import { getSmProvider } from "polkadot-api/sm-provider";
-import { polkadot, collectives } from "@polkadot-api/descriptors";
+import { start } from "smoldot";
+
 import { ActionLogger } from "./github/types";
-import polkadot_chain from "polkadot-api/chains/polkadot";
-import collectives_chain from "polkadot-api/chains/polkadot_collectives";
 
 type FellowData = { address: string; rank: number };
 
@@ -22,18 +22,14 @@ export const fetchAllFellows = async (
   const smoldot = start();
 
   try {
-    const smoldotRelayChain = await smoldot.addChain({ chainSpec: polkadot_chain.chainSpec, disableJsonRpc: true });
+    const smoldotRelayChain = await smoldot.addChain({
+      chainSpec: polkadotChainSpec,
+    });
 
     const jsonRpcProvider = getSmProvider(smoldotRelayChain);
     logger.info("Initializing the relay client");
     const polkadotClient = createClient(jsonRpcProvider);
 
-    // const relayClient = createClient(
-    //   getChain({
-    //     provider: getSmProvider(smoldot, polkadot),
-    //     keyring: [],
-    //   }),
-    // );
     const relayApi = polkadotClient.getTypedApi(polkadot);
 
     const getGhHandle = async (
@@ -44,14 +40,26 @@ export const fetchAllFellows = async (
         await relayApi.query.Identity.IdentityOf.getValue(address);
 
       if (identity) {
-        const handle = identity.info.additional
-          .find(([key]) => key.value?.asText() === "github")?.[1]
-          .value?.asText()
+        const additional = identity[0].info.additional.find(
+          ([key]) => (key.value as Binary)?.asText() === "github",
+        );
+
+        if (!additional) {
+          logger.debug(
+            `'${address}' does not have an additional field named 'github'`,
+          );
+          return;
+        }
+
+        const handle = (additional[1].value as Binary)
+          .asText()
           .replace("@", "");
+
         if (handle) {
           logger.info(`Found github handle for '${address}': '${handle}'`);
         } else {
           logger.debug(`'${address}' does not have a GitHub handle`);
+          return;
         }
         return handle;
       }
@@ -75,23 +83,15 @@ export const fetchAllFellows = async (
       }
     };
 
-    polkadotClient.destroy();
-
     logger.info("Initializing the collectives client");
 
-    const collectiveRelayChain = await smoldot.addChain({ chainSpec: collectives_chain.chainSpec });
+    const collectiveRelayChain = await smoldot.addChain({
+      chainSpec: collectivesChainSpec,
+      potentialRelayChains: [smoldotRelayChain],
+    });
     const collectiveJsonRpcProvider = getSmProvider(collectiveRelayChain);
     logger.info("Initializing the relay client");
     const collectivesClient = createClient(collectiveJsonRpcProvider);
-    // const collectivesClient = createClient(
-    //   getChain({
-    //     provider: getSmProvider(smoldot, {
-    //       potentialRelayChains: [relayChain],
-    //       chainSpec: polkadot_collectives,
-    //     }),
-    //     keyring: [],
-    //   }),
-    // );
     const collectivesApi = collectivesClient.getTypedApi(collectives);
 
     // Pull the members of the FellowshipCollective
@@ -106,7 +106,8 @@ export const fetchAllFellows = async (
       .filter(({ rank }) => rank > 0);
     logger.debug(JSON.stringify(fellows));
 
-    // We no longer need the collectives client, so let's destroy it
+    // We no longer need the clients, so let's destroy them
+    polkadotClient.destroy();
     collectivesClient.destroy();
 
     // Let's now pull the GH handles of the fellows
@@ -132,4 +133,3 @@ export const fetchAllFellows = async (
     await smoldot.terminate();
   }
 };
-*/
