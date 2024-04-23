@@ -1,11 +1,11 @@
 import { setFailed, setOutput, summary } from "@actions/core";
 import { SummaryTableRow } from "@actions/core/lib/summary";
 
-import { FellowObject, fetchAllFellows } from "./fellows";
+import { fetchIdentity } from "./experiment";
 import { generateCoreLogger } from "./util";
 
 const logger = generateCoreLogger();
-
+/*
 const mapFellows = async (fellows: FellowObject[]) => {
   setOutput("fellows", JSON.stringify(fellows));
   const githubHandles = fellows
@@ -34,5 +34,7 @@ const mapFellows = async (fellows: FellowObject[]) => {
 
   return await summary.addHeading("Fellows").addTable(table).write();
 };
+*/
 
-fetchAllFellows(logger).then(mapFellows).catch(setFailed);
+fetchIdentity(logger).then(() => console.log("Done")).catch(setFailed);
+// fetchAllFellows(logger).then(mapFellows).catch(setFailed);

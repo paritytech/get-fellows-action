@@ -1,8 +1,8 @@
-import { start } from "smoldot";
+/*import { start } from "smoldot";
 
 import { SS58String, createClient } from "polkadot-api";
 import { getSmProvider } from "polkadot-api/sm-provider";
-import { relay, collectives } from "@polkadot-api/descriptors";
+import { polkadot, collectives } from "@polkadot-api/descriptors";
 import { ActionLogger } from "./github/types";
 import polkadot_chain from "polkadot-api/chains/polkadot";
 import collectives_chain from "polkadot-api/chains/polkadot_collectives";
@@ -34,7 +34,7 @@ export const fetchAllFellows = async (
     //     keyring: [],
     //   }),
     // );
-    const relayApi = polkadotClient.getTypedApi(relay);
+    const relayApi = polkadotClient.getTypedApi(polkadot);
 
     const getGhHandle = async (
       address: SS58String,
@@ -132,3 +132,4 @@ export const fetchAllFellows = async (
     await smoldot.terminate();
   }
 };
+*/
