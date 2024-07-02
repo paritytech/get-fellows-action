@@ -13,7 +13,7 @@ jobs:
   test-image:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4
       - name: Check that the image builds
         run: docker build . --file Dockerfile
 
@@ -23,7 +23,7 @@ jobs:
       version: ${{ steps.verification.outputs.VERSION }}
       exists: ${{ steps.checkTag.outputs.exists }}
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4
       - name: Extract package.json version
         id: package_version
         run: echo "VERSION=$(jq '.version' -r package.json)" >> $GITHUB_OUTPUT
@@ -48,7 +48,7 @@ jobs:
       contents: write
       packages: write
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4
       - name: Tag version and create release
         run: gh release create $VERSION --generate-notes
         env:
