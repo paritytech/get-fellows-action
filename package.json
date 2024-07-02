@@ -8,9 +8,10 @@
     "build": "ncc build --license LICENSE",
     "postinstall": "papi",
     "test": "vitest",
-    "fix": "eslint --fix 'src/**/*'",
-    "lint": "eslint 'src/**/*'"
+    "fix": "npx eslint --fix 'src/**/*.ts' && npx prettier --write 'src/**/*.{ts,yml}'",
+    "lint": "npx eslint 'src/**/*.ts' && npx prettier --check 'src/**/*.{ts,yml}'"
   },
+  "packageManager": "yarn@4.3.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Bullrich/parity-action-template.git"
