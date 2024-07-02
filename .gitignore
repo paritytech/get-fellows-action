@@ -12,4 +12,4 @@
 
 # Papi
 src/codegen
-.yarn/
+.yarn/install-state.gz
