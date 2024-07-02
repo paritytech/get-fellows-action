@@ -1,18 +1,19 @@
-FROM node:20 as Builder
+FROM node:22 as Builder
 
 WORKDIR /action
 
-COPY package.json yarn.lock ./
+COPY .yarn/ ./.yarn/
+COPY package.json yarn.lock .yarnrc.yml ./
 
 COPY collectives.scale polkadot.scale polkadot-api.json ./
 
-RUN yarn install --frozen-lockfile
+RUN yarn install --immutable
 
 COPY . .
 
 RUN yarn run build
 
-FROM node:20-slim
+FROM node:22-slim
 
 COPY --from=Builder /action/dist /action
 
