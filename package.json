@@ -34,5 +34,8 @@
     "@vercel/ncc": "^0.38.1",
     "typescript": "^5.5.3",
     "vitest": "^1.6.0"
+  },
+  "resolutions": {
+    "@polkadot-api/descriptors": "portal:./.papi/descriptors"
   }
 }
