@@ -1,10 +1,10 @@
 {
-  "polkadot": {
-    "wsUrl": "wss://rpc.polkadot.io",
-    "metadata": "polkadot.scale"
-  },
   "collectives": {
     "wsUrl": "wss://polkadot-collectives-rpc.polkadot.io",
     "metadata": "collectives.scale"
+  },
+  "people": {
+    "wsUrl": "wss://polkadot-people-rpc.polkadot.io",
+    "metadata": "people.scale"
   }
 }
