@@ -1,7 +1,8 @@
-import { collectives, polkadot } from "@polkadot-api/descriptors";
-import { Binary, createClient, SS58String } from "polkadot-api";
+import { collectives, people } from "@polkadot-api/descriptors";
+import { createClient, SS58String } from "polkadot-api";
 import { chainSpec as polkadotChainSpec } from "polkadot-api/chains/polkadot";
 import { chainSpec as collectivesChainSpec } from "polkadot-api/chains/polkadot_collectives";
+import { chainSpec as peopleChainSpec } from "polkadot-api/chains/polkadot_people";
 import { getSmProvider } from "polkadot-api/sm-provider";
 import { start } from "smoldot";
 
@@ -22,38 +23,44 @@ export const fetchAllFellows = async (
   const smoldot = start();
 
   try {
+    // Create smoldot chain with Polkadot Relay Chain
     const smoldotRelayChain = await smoldot.addChain({
       chainSpec: polkadotChainSpec,
     });
 
-    const jsonRpcProvider = getSmProvider(smoldotRelayChain);
-    logger.info("Initializing the relay client");
-    const polkadotClient = createClient(jsonRpcProvider);
+    // Add the people chain to smoldot
+    const peopleRelayChain = await smoldot.addChain({
+      chainSpec: peopleChainSpec,
+      potentialRelayChains: [smoldotRelayChain],
+    });
 
-    const relayApi = polkadotClient.getTypedApi(polkadot);
+    // Initialize the smoldot provider
+    const jsonRpcProvider = getSmProvider(peopleRelayChain);
+    logger.info("Initializing the people client");
+    const peopleClient = createClient(jsonRpcProvider);
+
+    // Get the types for the people client
+    const peopleApi = peopleClient.getTypedApi(people);
 
     const getGhHandle = async (
       address: SS58String,
     ): Promise<string | undefined> => {
       logger.debug(`Fetching identity of '${address}'`);
-      const identity =
-        await relayApi.query.Identity.IdentityOf.getValue(address);
+      const identityOf =
+        await peopleApi.query.Identity.IdentityOf.getValue(address);
 
-      if (identity) {
-        const additional = identity[0].info.additional.find(
-          ([key]) => (key.value as Binary)?.asText() === "github",
-        );
+      if (identityOf) {
+        const [identity] = identityOf;
+        const github = identity.info.github.value;
 
-        if (!additional) {
+        if (!github) {
           logger.debug(
             `'${address}' does not have an additional field named 'github'`,
           );
           return;
         }
 
-        const handle = (additional[1].value as Binary)
-          .asText()
-          .replace("@", "");
+        const handle = github.asText().replace("@", "") as string;
 
         if (handle) {
           logger.info(`Found github handle for '${address}': '${handle}'`);
@@ -69,7 +76,7 @@ export const fetchAllFellows = async (
       );
 
       const superIdentityAddress = (
-        await relayApi.query.Identity.SuperOf.getValue(address)
+        await peopleApi.query.Identity.SuperOf.getValue(address)
       )?.[0];
 
       if (superIdentityAddress) {
@@ -122,7 +129,7 @@ export const fetchAllFellows = async (
     logger.info(`Found users: ${JSON.stringify(Array.from(users.entries()))}`);
 
     // We are now done with the relay client
-    polkadotClient.destroy();
+    peopleClient.destroy();
 
     return users;
   } catch (error) {

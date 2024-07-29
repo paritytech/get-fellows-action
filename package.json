@@ -1,6 +1,6 @@
 {
   "name": "get-fellows-action",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "description": "Fetch all the GitHub handles from the Fellows",
   "main": "src/index.ts",
   "scripts": {
@@ -25,7 +25,8 @@
   "dependencies": {
     "@actions/core": "^1.10.1",
     "@actions/github": "^5.1.1",
-    "polkadot-api": "^0.9.0",
+    "@polkadot-api/descriptors": "file:.papi/descriptors",
+    "polkadot-api": "^0.12.0",
     "smoldot": "2.0.29"
   },
   "devDependencies": {
@@ -33,5 +34,8 @@
     "@vercel/ncc": "^0.38.1",
     "typescript": "^5.5.3",
     "vitest": "^1.6.0"
+  },
+  "resolutions": {
+    "@polkadot-api/descriptors": "portal:./.papi/descriptors"
   }
 }
