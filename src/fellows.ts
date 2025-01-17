@@ -1,5 +1,5 @@
-import { collectives, people } from "@polkadot-api/descriptors";
-import { createClient, SS58String } from "polkadot-api";
+import { collectives, IdentityData, people } from "@polkadot-api/descriptors";
+import { Binary, createClient, SS58String } from "polkadot-api";
 import { chainSpec as polkadotChainSpec } from "polkadot-api/chains/polkadot";
 import { chainSpec as collectivesChainSpec } from "polkadot-api/chains/polkadot_collectives";
 import { chainSpec as peopleChainSpec } from "polkadot-api/chains/polkadot_people";
@@ -51,7 +51,7 @@ export const fetchAllFellows = async (
 
       if (identityOf) {
         const [identity] = identityOf;
-        const github = identity.info.github.value;
+        const github = readIdentityData(identity.info.github);
 
         if (!github) {
           logger.debug(
@@ -139,3 +139,10 @@ export const fetchAllFellows = async (
     await smoldot.terminate();
   }
 };
+
+function readIdentityData(identityData: IdentityData): Binary | null {
+  if (identityData.type === "None" || identityData.type === "Raw0") return null;
+  if (identityData.type === "Raw1")
+    return Binary.fromBytes(new Uint8Array(identityData.value));
+  return identityData.value;
+}
