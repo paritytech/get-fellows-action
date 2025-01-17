@@ -14,5 +14,11 @@ describe("Fellows test", () => {
   test("Should fetch fellows", async () => {
     const members = await fetchAllFellows(logger);
     expect(members.length).toBeGreaterThan(0);
+    expect(members).toContainEqual(
+      expect.objectContaining({
+        rank: 7,
+        githubHandle: "gavofyork",
+      }),
+    );
   }, 60_000);
 });
