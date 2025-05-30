@@ -8,6 +8,7 @@
     "build": "ncc build --license LICENSE",
     "postinstall": "papi",
     "test": "vitest",
+    "typecheck": "npx tsc --noEmit",
     "fix": "npx eslint --fix 'src/**/*.ts' && npx prettier --write 'src/**/*.{ts,yml}'",
     "lint": "npx eslint 'src/**/*.ts' && npx prettier --check 'src/**/*.{ts,yml}'"
   },
@@ -26,8 +27,8 @@
     "@actions/core": "^1.10.1",
     "@actions/github": "^5.1.1",
     "@polkadot-api/descriptors": "portal:.papi/descriptors",
-    "polkadot-api": "^1.8.2",
-    "smoldot": "^2.0.34"
+    "polkadot-api": "^1.12.2",
+    "smoldot": "^2.0.35"
   },
   "devDependencies": {
     "@eng-automation/js-style": "^3.1.0",

@@ -46,11 +46,10 @@ export const fetchAllFellows = async (
       address: SS58String,
     ): Promise<string | undefined> => {
       logger.debug(`Fetching identity of '${address}'`);
-      const identityOf =
+      const identity =
         await peopleApi.query.Identity.IdentityOf.getValue(address);
 
-      if (identityOf) {
-        const [identity] = identityOf;
+      if (identity) {
         const github = readIdentityData(identity.info.github);
 
         if (!github) {
