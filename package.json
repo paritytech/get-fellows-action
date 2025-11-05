@@ -1,6 +1,6 @@
 {
   "name": "get-fellows-action",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Fetch all the GitHub handles from the Fellows",
   "main": "src/index.ts",
   "scripts": {
@@ -24,17 +24,17 @@
   },
   "homepage": "https://github.com/Bullrich/parity-action-template#readme",
   "dependencies": {
-    "@actions/core": "^1.10.1",
-    "@actions/github": "^5.1.1",
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.1",
     "@polkadot-api/descriptors": "portal:.papi/descriptors",
-    "polkadot-api": "^1.12.2",
-    "smoldot": "^2.0.35"
+    "polkadot-api": "^1.20.1",
+    "smoldot": "^2.0.39"
   },
   "devDependencies": {
     "@eng-automation/js-style": "^3.1.0",
-    "@vercel/ncc": "^0.38.1",
-    "typescript": "^5.5.3",
-    "vitest": "^1.6.0"
+    "@vercel/ncc": "^0.38.4",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.7"
   },
   "resolutions": {
     "@polkadot-api/descriptors": "portal:./.papi/descriptors"
