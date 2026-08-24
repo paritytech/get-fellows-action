@@ -1,9 +1,23 @@
 import { collectives, IdentityData, people } from "@polkadot-api/descriptors";
-import { Binary, createClient, SS58String } from "polkadot-api";
+import {
+  Binary,
+  createClient,
+  HexString,
+  PolkadotClient,
+  SS58String,
+} from "polkadot-api";
 import { chainSpec as polkadotChainSpec } from "polkadot-api/chains/polkadot";
 import { chainSpec as collectivesChainSpec } from "polkadot-api/chains/polkadot_collectives";
 import { chainSpec as peopleChainSpec } from "polkadot-api/chains/polkadot_people";
 import { getSmProvider } from "polkadot-api/sm-provider";
+import {
+  filter,
+  firstValueFrom,
+  switchMap,
+  tap,
+  throwError,
+  timeout,
+} from "rxjs";
 import { start } from "smoldot";
 
 import { ActionLogger } from "./github/types";
@@ -16,6 +30,51 @@ export type FellowObject = {
   rank: number;
 };
 
+/**
+ * The People and Collectives chain specs ship without a `lightSyncState`, so
+ * smoldot derives their heads from the relay chain, whose own spec checkpoint
+ * lags days behind. Reading storage before the relay chain caught up would
+ * report an outdated fellowship, so a head is only trusted once its on-chain
+ * timestamp is close to wall clock. Guards against a head that stops advancing.
+ */
+const MAX_HEAD_AGE_MS = 5 * 60_000;
+const SYNC_TIMEOUT_MS = 5 * 60_000;
+
+const waitUntilSynced = async (
+  client: PolkadotClient,
+  readTimestamp: (at: HexString) => Promise<bigint>,
+  chainName: string,
+  logger: ActionLogger,
+): Promise<void> => {
+  await firstValueFrom(
+    client.finalizedBlock$.pipe(
+      switchMap(async (block) => {
+        const age = Date.now() - Number(await readTimestamp(block.hash));
+        logger.debug(
+          `${chainName}: finalized head #${block.number} is ${Math.round(age / 1000)}s old`,
+        );
+        return { block, age };
+      }),
+      filter(({ age }) => age <= MAX_HEAD_AGE_MS),
+      tap(({ block, age }) =>
+        logger.info(
+          `${chainName} is synced at block #${block.number} (${Math.round(age / 1000)}s old)`,
+        ),
+      ),
+      timeout({
+        each: SYNC_TIMEOUT_MS,
+        with: () =>
+          throwError(
+            () =>
+              new Error(
+                `${chainName} light client did not finish syncing within ${SYNC_TIMEOUT_MS / 1000}s`,
+              ),
+          ),
+      }),
+    ),
+  );
+};
+
 export const fetchAllFellows = async (
   logger: ActionLogger,
 ): Promise<FellowObject[]> => {
@@ -23,24 +82,48 @@ export const fetchAllFellows = async (
   const smoldot = start();
 
   try {
-    // Create smoldot chain with Polkadot Relay Chain
-    const smoldotRelayChain = await smoldot.addChain({
-      chainSpec: polkadotChainSpec,
-    });
+    // getSmProvider calls this factory again whenever smoldot destroyed the
+    // chain, so it must build a fresh one each time - returning a captured
+    // chain would hand back the dead one. The relay chain is therefore added
+    // per parachain, which costs nothing: smoldot reuses chains with the same
+    // chainSpec.
+    const addParachain = (chainSpec: string) => async () => {
+      const relayChain = await smoldot.addChain({
+        chainSpec: polkadotChainSpec,
+      });
+      return await smoldot.addChain({
+        chainSpec,
+        potentialRelayChains: [relayChain],
+      });
+    };
 
-    // Add the people chain to smoldot
-    const peopleRelayChain = await smoldot.addChain({
-      chainSpec: peopleChainSpec,
-      potentialRelayChains: [smoldotRelayChain],
-    });
-
-    // Initialize the smoldot provider
-    const jsonRpcProvider = getSmProvider(peopleRelayChain);
     logger.info("Initializing the people client");
-    const peopleClient = createClient(jsonRpcProvider);
-
-    // Get the types for the people client
+    const peopleClient = createClient(
+      getSmProvider(addParachain(peopleChainSpec)),
+    );
     const peopleApi = peopleClient.getTypedApi(people);
+
+    logger.info("Initializing the collectives client");
+    const collectivesClient = createClient(
+      getSmProvider(addParachain(collectivesChainSpec)),
+    );
+    const collectivesApi = collectivesClient.getTypedApi(collectives);
+
+    logger.info("Waiting for the light clients to sync");
+    await Promise.all([
+      waitUntilSynced(
+        collectivesClient,
+        (at) => collectivesApi.query.Timestamp.Now.getValue({ at }),
+        "Collectives chain",
+        logger,
+      ),
+      waitUntilSynced(
+        peopleClient,
+        (at) => peopleApi.query.Timestamp.Now.getValue({ at }),
+        "People chain",
+        logger,
+      ),
+    ]);
 
     const getGhHandle = async (
       address: SS58String,
@@ -59,7 +142,7 @@ export const fetchAllFellows = async (
           return;
         }
 
-        const handle = github.asText().replace("@", "") as string;
+        const handle = github.replace("@", "");
 
         if (handle) {
           logger.info(`Found github handle for '${address}': '${handle}'`);
@@ -88,17 +171,6 @@ export const fetchAllFellows = async (
         return undefined;
       }
     };
-
-    logger.info("Initializing the collectives client");
-
-    const collectiveRelayChain = await smoldot.addChain({
-      chainSpec: collectivesChainSpec,
-      potentialRelayChains: [smoldotRelayChain],
-    });
-    const collectiveJsonRpcProvider = getSmProvider(collectiveRelayChain);
-    logger.info("Initializing the relay client");
-    const collectivesClient = createClient(collectiveJsonRpcProvider);
-    const collectivesApi = collectivesClient.getTypedApi(collectives);
 
     // Pull the members of the FellowshipCollective
     const memberEntries =
@@ -139,9 +211,9 @@ export const fetchAllFellows = async (
   }
 };
 
-function readIdentityData(identityData: IdentityData): Binary | null {
+function readIdentityData(identityData: IdentityData): string | null {
   if (identityData.type === "None" || identityData.type === "Raw0") return null;
   if (identityData.type === "Raw1")
-    return Binary.fromBytes(new Uint8Array(identityData.value));
-  return identityData.value;
+    return Binary.toText(Uint8Array.of(identityData.value));
+  return Binary.toText(Binary.fromHex(identityData.value));
 }
